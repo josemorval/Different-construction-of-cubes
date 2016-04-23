@@ -4,7 +4,8 @@ using System.Collections;
 public class ProceduralMesh : MonoBehaviour {
 
 	public Material mat;
-	public Transform[] posCubes;
+	public float distanceOriginZ;
+	public float velRot;
 
 	Vector3[] vsShared;
 	int[] indsShared;
@@ -15,7 +16,6 @@ public class ProceduralMesh : MonoBehaviour {
 	Mesh cubeSharedVertices;
 	Mesh cubeUniqueVertices;
 
-	// Use this for initialization
 	void Start () {
 	
 		CreateCubeSharedVertices();
@@ -61,7 +61,25 @@ public class ProceduralMesh : MonoBehaviour {
 	}
 	
 	void Update () {
-		Graphics.DrawMesh(cubeSharedVertices,posCubes[0].localToWorldMatrix,mat,0);
-		Graphics.DrawMesh(cubeUniqueVertices,posCubes[1].localToWorldMatrix,mat,0);
+
+		MaterialPropertyBlock props = new MaterialPropertyBlock();
+		Quaternion rot;
+		Matrix4x4 m;
+
+		//First cube
+		rot = Quaternion.Euler(0f,velRot*Time.time,0f);
+		m = Matrix4x4.TRS(Vector3.zero, rot, Vector3.one);
+
+		props.SetMatrix("_rotMatrix",m);
+		props.SetFloat("_zoffset",distanceOriginZ);
+		Graphics.DrawMesh(cubeSharedVertices,transform.localToWorldMatrix,mat,0,null,0,props);
+
+		//Second cube
+		rot = Quaternion.Euler(0f,velRot*Time.time,0f);
+		m = Matrix4x4.TRS(Vector3.zero, rot, Vector3.one);
+
+		props.SetMatrix("_rotMatrix",m);
+		props.SetFloat("_zoffset",-distanceOriginZ);
+		Graphics.DrawMesh(cubeUniqueVertices,transform.localToWorldMatrix,mat,0,null,0,props);
 	}
 }
